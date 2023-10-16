@@ -11,9 +11,21 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import java.util.ArrayList;
 
 
 public class BaccaratGame extends Application {
+
+	ArrayList<Card> playerHand;
+	ArrayList<Card> bankerHand;
+	BaccaratDealer theDealer;
+	BaccaratGameLogic gameLogic;
+	double currentBet;
+	double totalWinnings;
+
+	public double evaluateWinnings(){
+		return 1;
+	}
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
