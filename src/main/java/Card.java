@@ -6,4 +6,8 @@ public class Card {
         this.suite = theSuite;
         this.value = theValue;
     }
+
+    int getValue(){
+        return this.value;
+    }
 }
