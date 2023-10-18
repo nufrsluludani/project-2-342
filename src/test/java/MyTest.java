@@ -11,7 +11,10 @@ class MyTest {
 
 	@Test
 	void test() {
-		fail("Not yet implemented");
+		BaccaratDealer test = new BaccaratDealer();
+
+		test.generateDeck();
+
 	}
 
 }
