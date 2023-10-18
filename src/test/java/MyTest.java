@@ -15,7 +15,7 @@ class MyTest {
 
 		test.generateDeck();
 
-		System.out.println(test.dealHand().get(0).getSuite() + test.dealHand().get(0).getValue());
+		System.out.println(test.dealHand().get(1).getSuite() + test.dealHand().get(1).getValue());
 
 	}
 
