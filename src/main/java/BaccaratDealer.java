@@ -1,10 +1,11 @@
 import java.util.ArrayList;
+import java.util.List;
+
 public class BaccaratDealer {
     ArrayList<Card> deck;
     String[] suites = {"HEART","SPADE","DIAMOND","CLUB"};
 
-    public void generateDeck(){
-
+    public void generateDeck() {
         deck = new ArrayList<Card>();
         for(int i = 0; i < 4; i++) {
             for (int j = 1; j < 14; j++) {
@@ -14,10 +15,15 @@ public class BaccaratDealer {
         }
     }
     public ArrayList<Card> dealHand(){
-        return null;
+
+        ArrayList<Card> hand = new ArrayList<Card>();
+        hand.add(drawOne());
+        hand.add(drawOne());
+
+        return hand;
     }
     public Card drawOne(){
-        return null;
+
     }
     public void shuffleDeck(){
 
