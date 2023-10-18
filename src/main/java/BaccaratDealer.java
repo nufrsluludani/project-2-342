@@ -8,15 +8,15 @@ import java.util.Random;
 import java.util.Collections;
 
 public class BaccaratDealer {
-    ArrayList<Card> deck;
-    ArrayList<Integer> dealedCards = new ArrayList();
+    ArrayList<Card> deck = new ArrayList<>();
+    ArrayList<Integer> dealedCards = new ArrayList<>();
     String[] suites = new String[]{"HEART", "SPADE", "DIAMOND", "CLUB"};
 
     public BaccaratDealer() {
     }
 
     public void generateDeck() {
-        this.deck = new ArrayList();
+        this.deck.clear();
         this.dealedCards.clear();
 
         for(int i = 0; i < 4; ++i) {
