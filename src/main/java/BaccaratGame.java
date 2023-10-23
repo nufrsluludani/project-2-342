@@ -7,6 +7,7 @@ import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -30,6 +31,7 @@ public class BaccaratGame extends Application {
 	BaccaratGameLogic gameLogic;
 	double currentBet;
 	double totalWinnings;
+	int counter;
 
 	public double evaluateWinnings(){
 		return 1;
@@ -84,52 +86,73 @@ public class BaccaratGame extends Application {
 
 	// GAME SCREEN
 	public Scene gameScreen(){
+
 		// BANKER
 		// generate hand and deck
-		ArrayList<Card> bankerHand = new ArrayList<>(); // hand holds two cards
+		ArrayList<Card> bankerHand; // hand holds two cards
 		theDealer = new BaccaratDealer();
 		theDealer.generateDeck(); // generate deck
 		bankerHand = theDealer.dealHand(); // deal hand to hand
 
 		// make cards
-		Button Banker = new Button();
-
-		// banker card properties
-		Banker.setDisable(true);
-		Banker.setFont((Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 20)));
-
-		// set text inside cards
-		Banker.setText(bankerHand.get(0).getSuite() + " " + bankerHand.get(0).getValue() + "\n" + bankerHand.get(1).getSuite() + " " +bankerHand.get(1).getValue());
-
+		Label BankerC1 = new Label("Test");
+		Label BankerC2 = new Label("Test");
+		Label BankerC3 = new Label("Test");
+		VBox Banker = new VBox(BankerC1,BankerC2,BankerC3);
+		Banker.setAlignment(Pos.CENTER);
 
 		// Player
 		// generate hand and deck
-		ArrayList<Card> playerHand = new ArrayList<>(); // hand holds two cards
-		theDealer = new BaccaratDealer();
-		theDealer.generateDeck(); // generate deck
+		ArrayList<Card> playerHand; // hand holds two cards
 		playerHand = theDealer.dealHand(); // deal hand to hand
 
 		// make cards
-		Button Player = new Button();
+		Label PlayerC1 = new Label("Test");
+		Label PlayerC2 = new Label("Test");
+		Label PlayerC3 = new Label("Test");
+		VBox Player = new VBox(PlayerC1,PlayerC2,PlayerC3);
+		Player.setAlignment(Pos.CENTER);
 
-		// banker card properties
-		Player.setDisable(true);
-		Player.setFont((Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 20)));
-
-		// set text inside cards
-		Player.setText(playerHand.get(0).getSuite() + " " + playerHand.get(0).getValue() + "\n" + playerHand.get(1).getSuite() + " " + playerHand.get(1).getValue());
 
 		// create HBox to hold cards
-		HBox cards = new HBox(Banker, Player);
-
-
-		//Align HBox
+		HBox cards = new HBox(Player, Banker);
 		cards.setAlignment(Pos.CENTER);
 		cards.setSpacing(200);
 
-		Banker.setPrefSize(200,200);
-		Player.setPrefSize(200,200);
+		//DEAL Button
+		Button deal = new Button();
+		deal.setText("Deal");
+		deal.setPrefSize(100,50);
+		VBox dealButton = new VBox(deal);
 
-		return new Scene(cards, 700,700);
+		//hard coded to update each card when you click deal
+		counter = 0;
+		deal.setOnAction(e -> {
+			if(counter == 0){
+				PlayerC1.setText(playerHand.get(0).getSuite() + " " + playerHand.get(0).getValue());
+			} else if(counter == 1){
+				BankerC1.setText(bankerHand.get(0).getSuite() + " " + bankerHand.get(0).getValue());
+			} else if (counter == 2){
+				PlayerC2.setText(playerHand.get(1).getSuite() + " " + playerHand.get(1).getValue());
+			} else if (counter == 3){
+				BankerC2.setText(bankerHand.get(1).getSuite() + " " + bankerHand.get(1).getValue());
+			}
+			incrementCounter();
+		});
+
+
+
+		//Border pane set up
+		BorderPane bpane = new BorderPane();
+		bpane.setBottom(deal);
+		BorderPane.setAlignment(deal,Pos.CENTER);
+		bpane.setCenter(cards);
+
+		return new Scene(bpane, 700,700);
+	}
+
+	//helper function to help with the deal button
+	public void incrementCounter(){
+		counter++;
 	}
 }

@@ -44,7 +44,7 @@ public class BaccaratDealer {
             n = rand.nextInt(52);
 
             for(int i = 0; i < this.dealedCards.size(); ++i) {
-                if ((Integer)this.dealedCards.get(i) == n) {
+                if (this.dealedCards.get(i) == n) {
                     used = true;
                 }
             }
