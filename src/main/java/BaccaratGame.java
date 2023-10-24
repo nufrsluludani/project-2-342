@@ -365,6 +365,7 @@ public class BaccaratGame extends Application {
 		// restart button
 		Button restartButton = new Button("Restart");
 		restartButton.setOnAction(e -> {
+			YourBet = "";
 			WhoWon = "";
 			optionsStage.close();
 			try {
@@ -374,6 +375,7 @@ public class BaccaratGame extends Application {
 			}
 			primaryStage.show();
 		});
+
 
 		// hbox to hold buttons
 		HBox buttonBox = new HBox(exitButton, restartButton);
@@ -387,9 +389,6 @@ public class BaccaratGame extends Application {
 
 		optionsStage.showAndWait();
 	}
-
-
-
 
 
 	private void displayCard(Label label, Card card) {
