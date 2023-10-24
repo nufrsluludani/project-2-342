@@ -25,7 +25,7 @@ public class BaccaratDealer {
                 this.deck.add(temp);
             }
         }
-
+        Collections.shuffle(this.deck);
     }
 
     public ArrayList<Card> dealHand() {
@@ -36,21 +36,11 @@ public class BaccaratDealer {
     }
 
     public Card drawOne() {
-        boolean used = false;
-        Random rand = new Random();
 
-        int n;
-        do {
-            n = rand.nextInt(52);
+        Card cardDrawn = this.deck.get(0); // get card
+        this.deck.remove(0); // remove card that was dealt
 
-            for(int i = 0; i < this.dealedCards.size(); ++i) {
-                if (this.dealedCards.get(i) == n) {
-                    used = true;
-                }
-            }
-        } while(used);
-
-        return new Card(((Card)this.deck.get(n)).getSuite(), ((Card)this.deck.get(n)).getValue());
+        return cardDrawn;
     }
 
     public void shuffleDeck() {
