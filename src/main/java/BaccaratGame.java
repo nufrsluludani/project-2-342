@@ -10,6 +10,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -30,6 +31,8 @@ public class BaccaratGame extends Application {
 	double currentBet;
 	double totalWinnings;
 	int counter = 0;
+	String YourBet = "";
+	String WhoWon = "";
 
 	private Timeline cardAnimation;
 
@@ -90,9 +93,16 @@ public class BaccaratGame extends Application {
 	public Scene bettingScreen(Stage primaryStage) throws Exception {
 
 		// textfield
-		TextField amountToBid = new TextField("Amount To Bid:");
-		amountToBid.setFont(new Font("Serif", 36));
-		amountToBid.setPrefSize(200,100);
+		TextField placeHolder = new TextField();
+		placeHolder.setFont(new Font("Serif", 36));
+		placeHolder.setPrefSize(200,100);
+
+		// Label
+		Label betInfoLabel = new Label("Place your bet and choose a side:");
+		betInfoLabel.setFont(new Font("Serif", 26));
+		betInfoLabel.setTextFill(Color.BLACK);
+		VBox bid = new VBox(betInfoLabel, placeHolder);
+		bid.setAlignment(Pos.CENTER);
 
 		// buttons
 		Button play = new Button();
@@ -100,10 +110,10 @@ public class BaccaratGame extends Application {
 		play.setText("PLAY");
 		play.setFont((Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 50)));
 
-		Button dealer = new Button();
-		dealer.setPrefSize(150,150);
-		dealer.setText("Dealer");
-		dealer.setFont((Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 20)));
+		Button banker = new Button();
+		banker.setPrefSize(150,150);
+		banker.setText("Banker");
+		banker.setFont((Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 20)));
 
 		Button player = new Button();
 		player.setPrefSize(150,150);
@@ -116,12 +126,38 @@ public class BaccaratGame extends Application {
 		draw.setFont((Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 20)));
 
 		//hBox
-		HBox container = new HBox(player, draw, dealer);
+		HBox container = new HBox(player, draw, banker);
 		container.setAlignment(Pos.CENTER);
 		//VBox
-		VBox all = new VBox(amountToBid, container);
+		VBox all = new VBox(bid, container);
 
-		play.setOnAction(e -> {primaryStage.setScene(gameScreen());
+
+		// placing bets
+		banker.setOnAction(e ->{
+			YourBet += "Banker";
+			player.setDisable(true);
+			draw.setDisable(true);
+		});
+
+		player.setOnAction(e ->{
+			YourBet += "Player";
+			banker.setDisable(true);
+			draw.setDisable(true);
+		});
+
+		draw.setOnAction(e ->{
+			YourBet += "Draw";
+			player.setDisable(true);
+			banker.setDisable(true);
+		});
+
+		play.setOnAction(e -> {
+			currentBet = Double.parseDouble(placeHolder.getText());
+			try {
+				primaryStage.setScene(gameScreen(primaryStage));
+			} catch (Exception ex) {
+				throw new RuntimeException(ex);
+			}
 			primaryStage.show();
 			startCardAnimation();
 		});
@@ -134,6 +170,7 @@ public class BaccaratGame extends Application {
 		bpane.setCenter(all);
 		BorderPane.setAlignment(play, Pos.CENTER);
 		BorderPane.setAlignment(all, Pos.CENTER);
+		BorderPane.setAlignment(bid, Pos.CENTER);
 
 		return new Scene(bpane, 700, 700);
 	}
@@ -141,7 +178,13 @@ public class BaccaratGame extends Application {
 
 
 	// GAME SCREEN
-	public Scene gameScreen(){
+	public Scene gameScreen(Stage primaryStage) throws Exception{
+
+		// Label for current bet
+		Label currentBetLabel = new Label("Current Bet: " + currentBet + " Bones");
+		currentBetLabel.setFont(new Font("Serif", 50));
+		currentBetLabel.setTextFill(Color.BLACK);
+
 
 		// BANKER
 		// generate hand and deck
@@ -204,6 +247,9 @@ public class BaccaratGame extends Application {
 				BackgroundPosition.CENTER,
 				bSize)));
 		bpane.setCenter(cards);
+		bpane.setTop(currentBetLabel);
+		BorderPane.setAlignment(currentBetLabel, Pos.CENTER);
+
 
 		ArrayList<Card> finalPlayerHand = playerHand;
 		ArrayList<Card> finalPlayerHand1 = playerHand;
@@ -226,6 +272,7 @@ public class BaccaratGame extends Application {
 			if(gameLogic.handTotal(bankerHand) <= 2){
 				bankerHand.add(theDealer.drawOne());
 				BankerC3.setText(bankerHand.get(2).getSuite() + " " + bankerHand.get(2).getValue());
+
 			}
 			else if (gameLogic.handTotal(bankerHand) <= 6 && playerHand.size() == 3){
 				bankerHand.add(theDealer.drawOne());
@@ -233,10 +280,117 @@ public class BaccaratGame extends Application {
 			}
 		}
 
-		System.out.println(gameLogic.whoWon(bankerHand, playerHand));
+		WhoWon += gameLogic.whoWon(bankerHand, playerHand);
+		cardAnimation.setOnFinished(event -> {
+			Timeline delayTimeline = new Timeline( // delay
+					new KeyFrame(Duration.seconds(5), e -> {
+						try {
+							primaryStage.setScene(endScreen(primaryStage));
+						} catch (Exception ex) {
+							throw new RuntimeException(ex);
+						}
+						primaryStage.show();
+					})
+			);
+
+			delayTimeline.setCycleCount(1);
+			delayTimeline.play();
+		});
+
+		cardAnimation.setCycleCount(1);
+		cardAnimation.play();
 
 		return new Scene(bpane, 700,700);
 	}
+
+	public Scene endScreen(Stage primaryStage) throws Exception {
+		BorderPane bpane = new BorderPane();
+
+		Font boldFont = Font.font("Serif", FontWeight.BOLD, 50);
+
+		Label resultLabel = new Label("Winner: " + WhoWon);
+		resultLabel.setFont(boldFont);
+		resultLabel.setTextFill(Color.BLACK);
+
+		// show players choice
+		Label choice = new Label("You bet on: " + YourBet);
+		choice.setFont(new Font("Serif", 24));
+		choice.setTextFill(Color.BLACK);
+
+		Label betInfoLabel = new Label();
+		betInfoLabel.setFont(new Font("Serif", 24));
+		betInfoLabel.setTextFill(Color.BLACK);
+
+		// Set the text for the betInfoLabel based on the outcome
+		if (YourBet.equals("Banker") && WhoWon.equals("Banker")) {
+			betInfoLabel.setText("You bet on Banker and won!");
+		}
+		else if (YourBet.equals("Player") && WhoWon.equals("Player")) {
+			betInfoLabel.setText("You bet on Player and won!");
+		}
+		else if (YourBet.equals("Draw") && WhoWon.equals("Draw")) {
+			betInfoLabel.setText("You bet on Draw and won!");
+		}
+		else {
+			betInfoLabel.setText("You bet on " + YourBet + " and lost.");
+		}
+
+		Button optionsButton = new Button("Options");
+		optionsButton.setPrefSize(100, 80);
+		optionsButton.setOnAction(e -> openOptionsTab(primaryStage));
+
+		VBox labelsBox = new VBox(choice, resultLabel, betInfoLabel);
+		labelsBox.setAlignment(Pos.CENTER);
+
+		bpane.setCenter(labelsBox);
+
+		HBox optionsBox = new HBox(optionsButton);
+		optionsBox.setAlignment(Pos.TOP_RIGHT);
+		bpane.setTop(optionsBox);
+
+		return new Scene(bpane, 700, 700);
+	}
+
+
+	private void openOptionsTab(Stage primaryStage) {
+		Stage optionsStage = new Stage();
+		optionsStage.setTitle("Options");
+		optionsStage.initModality(Modality.APPLICATION_MODAL);
+		optionsStage.initOwner(primaryStage);
+
+		// exit button
+		Button exitButton = new Button("Exit");
+		exitButton.setOnAction(e -> System.exit(0));
+
+		// restart button
+		Button restartButton = new Button("Restart");
+		restartButton.setOnAction(e -> {
+			WhoWon = "";
+			optionsStage.close();
+			try {
+				primaryStage.setScene(bettingScreen(primaryStage));
+			} catch (Exception ex) {
+				throw new RuntimeException(ex);
+			}
+			primaryStage.show();
+		});
+
+		// hbox to hold buttons
+		HBox buttonBox = new HBox(exitButton, restartButton);
+		buttonBox.setAlignment(Pos.CENTER);
+
+		VBox optionsLayout = new VBox(buttonBox);
+		optionsLayout.setAlignment(Pos.CENTER);
+
+		Scene optionsScene = new Scene(optionsLayout, 400, 300);
+		optionsStage.setScene(optionsScene);
+
+		optionsStage.showAndWait();
+	}
+
+
+
+
 
 	private void displayCard(Label label, Card card) {
 		label.setText(card.getSuite() + " " + card.getValue());
