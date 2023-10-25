@@ -4,6 +4,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -14,6 +15,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
+import java.util.Queue;
+
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.animation.KeyFrame;
@@ -24,15 +27,17 @@ import javafx.util.Duration;
 
 public class BaccaratGame extends Application {
 
-	ArrayList<Card> playerHand;
-	ArrayList<Card> bankerHand;
+	ArrayList<Card> playerHand = new ArrayList<>();
+	ArrayList<Card> bankerHand = new ArrayList<>();
 	BaccaratDealer theDealer;
 	BaccaratGameLogic gameLogic = new BaccaratGameLogic();
 	double currentBet;
-	double totalWinnings;
+	double totalWinnings = 0;
 	int counter = 0;
 	String YourBet = "";
 	String WhoWon = "";
+	ArrayList<String> gameHistory = new ArrayList<>();
+	ListView<String> displayWins = new ListView<>();
 
 	private Timeline cardAnimation;
 
@@ -179,18 +184,29 @@ public class BaccaratGame extends Application {
 
 	// GAME SCREEN
 	public Scene gameScreen(Stage primaryStage) throws Exception{
+		//display wins properties
+		displayWins.setPrefSize(100,100);
 
-		// Label for current bet
+
+		// Label for current bet and total hand
 		Label currentBetLabel = new Label("Current Bet: " + currentBet + " Bones");
-		currentBetLabel.setFont(new Font("Serif", 50));
+		currentBetLabel.setFont(new Font("Serif", 25));
 		currentBetLabel.setTextFill(Color.BLACK);
 
+		Label totalHand = new Label("Total Hand: " + totalWinnings);
+		totalHand.setFont(new Font("Serif", 25));
+		totalHand.setTextFill(Color.BLACK);
+
+		HBox topOfScreen = new HBox(currentBetLabel,totalHand);
+		topOfScreen.setSpacing(50);
+		topOfScreen.setAlignment(Pos.CENTER);
 
 		// BANKER
 		// generate hand and deck
 		theDealer = new BaccaratDealer();
 		theDealer.generateDeck(); // generate deck
-		ArrayList<Card> bankerHand = new ArrayList<Card>(); // hand holds two cards
+		//ArrayList<Card> bankerHand = new ArrayList<Card>(); // hand holds two cards
+		bankerHand.clear();
 		bankerHand = theDealer.dealHand(); // deal hand to banker
 
 		// test code
@@ -211,7 +227,8 @@ public class BaccaratGame extends Application {
 
 		// Player
 		// generate hand and deck
-		ArrayList<Card> playerHand = new ArrayList<Card>(); // hand holds two cards
+		//ArrayList<Card> playerHand = new ArrayList<Card>(); // hand holds two cards
+		playerHand.clear();
 		playerHand = theDealer.dealHand(); // deal hand to player
 
 		// test code
@@ -234,10 +251,14 @@ public class BaccaratGame extends Application {
 		VBox Player = new VBox(PlayerC1,PlayerC2,PlayerC3);
 		Player.setAlignment(Pos.CENTER);
 
+		//label to announce drawing of third card
+		Label thirdCard = new Label();
+		thirdCard.setTextFill(Color.WHITE);
+
 		// create HBox to hold cards
-		HBox cards = new HBox(Player, Banker);
+		HBox cards = new HBox(Player,thirdCard, Banker);
 		cards.setAlignment(Pos.CENTER);
-		cards.setSpacing(200);
+		cards.setSpacing(100);
 
 		//Border pane set up
 		BorderPane bpane = new BorderPane();
@@ -247,8 +268,10 @@ public class BaccaratGame extends Application {
 				BackgroundPosition.CENTER,
 				bSize)));
 		bpane.setCenter(cards);
-		bpane.setTop(currentBetLabel);
+		bpane.setTop(topOfScreen);
+		bpane.setBottom(displayWins);
 		BorderPane.setAlignment(currentBetLabel, Pos.CENTER);
+		BorderPane.setAlignment(cards,Pos.CENTER);
 
 
 		ArrayList<Card> finalPlayerHand = playerHand;
@@ -262,27 +285,32 @@ public class BaccaratGame extends Application {
 				new KeyFrame(Duration.seconds(4), e -> displayCard(BankerC2, finalBankerHand1.get(1)))
 		);
 
-		ArrayList<Card> finalPlayerHand2 = playerHand;
-		if(gameLogic.evaluatePlayerDraw(playerHand)){
-			finalPlayerHand2.add(theDealer.drawOne());
-			PlayerC3.setText(finalPlayerHand2.get(2).getSuite() + " " + finalPlayerHand2.get(2).getValue());
-		}
 
-        if(gameLogic.evaluateBankerDraw(bankerHand, null)){
-			if(gameLogic.handTotal(bankerHand) <= 2){
-				bankerHand.add(theDealer.drawOne());
-				BankerC3.setText(bankerHand.get(2).getSuite() + " " + bankerHand.get(2).getValue());
-
-			}
-			else if (gameLogic.handTotal(bankerHand) <= 6 && playerHand.size() == 3){
-				bankerHand.add(theDealer.drawOne());
-				BankerC3.setText(bankerHand.get(2).getSuite() + " " + bankerHand.get(2).getValue());
-			}
-		}
 
 		WhoWon += gameLogic.whoWon(bankerHand, playerHand);
 		cardAnimation.setOnFinished(event -> {
 			Timeline delayTimeline = new Timeline( // delay
+					new KeyFrame(Duration.seconds(2), e -> {
+						ArrayList<Card> finalPlayerHand2 = finalPlayerHand;
+						if (gameLogic.evaluatePlayerDraw(finalPlayerHand)) {
+							thirdCard.setText("Drawing third card");
+							finalPlayerHand2.add(theDealer.drawOne());
+							PlayerC3.setText(finalPlayerHand2.get(2).getSuite() + " " + finalPlayerHand2.get(2).getValue());
+						}
+
+						if (gameLogic.evaluateBankerDraw(finalBankerHand, null)) {
+							if (gameLogic.handTotal(finalBankerHand) <= 2) {
+								thirdCard.setText("Drawing third card");
+								finalBankerHand.add(theDealer.drawOne());
+								BankerC3.setText(finalBankerHand.get(2).getSuite() + " " + finalBankerHand.get(2).getValue());
+
+							} else if (gameLogic.handTotal(finalBankerHand) <= 6 && finalPlayerHand.size() == 3) {
+								thirdCard.setText("Drawing third card");
+								finalBankerHand.add(theDealer.drawOne());
+								BankerC3.setText(finalBankerHand.get(2).getSuite() + " " + finalBankerHand.get(2).getValue());
+							}
+						}
+					}),
 					new KeyFrame(Duration.seconds(5), e -> {
 						try {
 							primaryStage.setScene(endScreen(primaryStage));
@@ -321,25 +349,47 @@ public class BaccaratGame extends Application {
 		betInfoLabel.setFont(new Font("Serif", 24));
 		betInfoLabel.setTextFill(Color.BLACK);
 
+		String winnerHistory;
 		// Set the text for the betInfoLabel based on the outcome
 		if (YourBet.equals("Banker") && WhoWon.equals("Banker")) {
 			betInfoLabel.setText("You bet on Banker and won!");
+			totalWinnings += currentBet;
+			winnerHistory = "Congrats";
 		}
 		else if (YourBet.equals("Player") && WhoWon.equals("Player")) {
 			betInfoLabel.setText("You bet on Player and won!");
+			totalWinnings += currentBet;
+			winnerHistory = "Congrats";
 		}
 		else if (YourBet.equals("Draw") && WhoWon.equals("Draw")) {
 			betInfoLabel.setText("You bet on Draw and won!");
+			totalWinnings += currentBet*8;
+			winnerHistory = "Congrats";
 		}
 		else {
 			betInfoLabel.setText("You bet on " + YourBet + " and lost.");
+			winnerHistory = "Sorry";
 		}
-
+		displayWins.getItems().add("Player Total: " + Integer.toString(gameLogic.handTotal(playerHand)) + " Banker Total: " + Integer.toString(gameLogic.handTotal(bankerHand)) + "\n" + gameLogic.whoWon(bankerHand,playerHand) + " wins\n" + winnerHistory + ", " + betInfoLabel.getText() + "\n");
 		Button optionsButton = new Button("Options");
 		optionsButton.setPrefSize(100, 80);
 		optionsButton.setOnAction(e -> openOptionsTab(primaryStage));
 
-		VBox labelsBox = new VBox(choice, resultLabel, betInfoLabel);
+		// play another round button
+		Button anotherRound = new Button("Play another round");
+		anotherRound.setPrefSize(200, 100);
+		anotherRound.setOnAction(e -> {
+			try {
+				YourBet = "";
+				WhoWon = "";
+				primaryStage.setScene(bettingScreen(primaryStage));
+			} catch (Exception ex) {
+				throw new RuntimeException(ex);
+			}
+			primaryStage.show();
+		} );
+
+		VBox labelsBox = new VBox(choice, resultLabel, betInfoLabel,anotherRound);
 		labelsBox.setAlignment(Pos.CENTER);
 
 		bpane.setCenter(labelsBox);
@@ -363,10 +413,12 @@ public class BaccaratGame extends Application {
 		exitButton.setOnAction(e -> System.exit(0));
 
 		// restart button
-		Button restartButton = new Button("Restart");
+		Button restartButton = new Button("Fresh Start");
 		restartButton.setOnAction(e -> {
 			YourBet = "";
 			WhoWon = "";
+			totalWinnings = 0;
+			displayWins.getItems().clear();
 			optionsStage.close();
 			try {
 				primaryStage.setScene(bettingScreen(primaryStage));
