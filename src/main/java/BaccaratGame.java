@@ -42,7 +42,11 @@ public class BaccaratGame extends Application {
 	private Timeline cardAnimation;
 
 	public double evaluateWinnings(){
-		return 1;
+		if(WhoWon == YourBet){
+			return currentBet;
+		} else {
+			return currentBet * -1;
+		}
 	}
 
 	public static void main(String[] args) {
@@ -189,7 +193,7 @@ public class BaccaratGame extends Application {
 
 
 		// Label for current bet and total hand
-		Label currentBetLabel = new Label("Current Bet: " + currentBet + " Bones");
+		Label currentBetLabel = new Label("Current Bet: " + currentBet + " $");
 		currentBetLabel.setFont(new Font("Serif", 25));
 		currentBetLabel.setTextFill(Color.BLACK);
 
@@ -216,9 +220,9 @@ public class BaccaratGame extends Application {
 //		bankerHand.add(secondCard);
 
 		// make cards
-		Label BankerC1 = new Label("Test");
-		Label BankerC2 = new Label("Test");
-		Label BankerC3 = new Label("*Extra Dealed Cards Go Here*");
+		Label BankerC1 = new Label("First Card");
+		Label BankerC2 = new Label("Second Card");
+		Label BankerC3 = new Label("*Third Card*");
 		BankerC1.setTextFill(Color.WHITE);
 		BankerC2.setTextFill(Color.WHITE);
 		BankerC3.setTextFill(Color.WHITE);
@@ -242,9 +246,9 @@ public class BaccaratGame extends Application {
 		BackgroundSize bSize = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false);
 
 		// make cards
-		Label PlayerC1 = new Label("Test");
-		Label PlayerC2 = new Label("Test");
-		Label PlayerC3 = new Label("*Extra Dealed Cards Go Here*");
+		Label PlayerC1 = new Label("First Card");
+		Label PlayerC2 = new Label("Second Card");
+		Label PlayerC3 = new Label("Third Card");
 		PlayerC1.setTextFill(Color.WHITE);
 		PlayerC2.setTextFill(Color.WHITE);
 		PlayerC3.setTextFill(Color.WHITE);
